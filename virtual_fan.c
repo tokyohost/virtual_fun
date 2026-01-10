@@ -8,51 +8,93 @@
 // 模拟数据结构
 struct virtual_fan_data {
     long pwm_value;   // 0-255
+    long enabled;   // 0 = disabled, 1 = manual
     long fan_speed;   // RPM
 };
 
 // 1. 定义哪些属性是可见的
 static umode_t virtual_fan_is_visible(const void *data, enum hwmon_sensor_types type,
                                      u32 attr, int channel) {
-    switch (type) {
-        case hwmon_pwm:
-            if (attr == hwmon_pwm_input) return 0644; // 可读写
-            break;
-        case hwmon_fan:
-            if (attr == hwmon_fan_input) return 0444; // 只读
-            break;
-        default:
-            break;
+    if (type == hwmon_pwm) {
+        // 此时 channel 应该是 0，对应的文件名会是 pwm1
+        switch (attr) {
+            case hwmon_pwm_input:
+            case hwmon_pwm_enable:
+            case hwmon_pwm_mode:
+                return 0644;
+            default: return 0;
+        }
+    } else if (type == hwmon_fan) {
+        if (attr == hwmon_fan_input) return 0444;
     }
     return 0;
 }
 
 // 2. 读取数据 (cat 访问时触发)
-static int virtual_fan_read(struct device *dev, enum hwmon_sensor_types type,
-                            u32 attr, int channel, long *val) {
+static int virtual_fan_read(struct device *dev,
+                            enum hwmon_sensor_types type,
+                            u32 attr, int channel, long *val)
+{
     struct virtual_fan_data *data = dev_get_drvdata(dev);
 
-    if (type == hwmon_pwm && attr == hwmon_pwm_input) {
-        *val = data->pwm_value;
-        return 0;
-    } else if (type == hwmon_fan && attr == hwmon_fan_input) {
-        // 模拟逻辑：转速 = PWM * 20 (假设最高 5100 RPM)
-        *val = data->pwm_value * 20;
-        return 0;
+    if (type == hwmon_pwm) {
+        if (attr == hwmon_pwm_input) {
+            *val = data->pwm_value;
+            return 0;
+        }
+        if (attr == hwmon_pwm_enable) {
+            *val = data->enabled;   // 必须返回 0 / 1
+            return 0;
+        }
+        return -EOPNOTSUPP;
     }
-    return -EINVAL;
+
+    if (type == hwmon_fan) {
+        if (attr == hwmon_fan_input) {
+            *val = data->pwm_value * 20;
+            return 0;
+        }
+        return -EOPNOTSUPP;
+    }
+
+    return -EOPNOTSUPP;
 }
 
 // 3. 写入数据 (echo 访问时触发)
-static int virtual_fan_write(struct device *dev, enum hwmon_sensor_types type,
-                             u32 attr, int channel, long val) {
+static int virtual_fan_write(struct device *dev,
+                             enum hwmon_sensor_types type,
+                             u32 attr, int channel, long val)
+{
     struct virtual_fan_data *data = dev_get_drvdata(dev);
 
-    if (type == hwmon_pwm && attr == hwmon_pwm_input) {
-        if (val < 0 || val > 255) return -EINVAL;
-        data->pwm_value = val;
-        return 0;
+    /* 仅支持 pwm1 */
+    if (channel != 0)
+        return -EINVAL;
+
+    if (type != hwmon_pwm)
+        return -EINVAL;
+
+    switch (attr) {
+
+        case hwmon_pwm_enable:
+            /* fancontrol 只要求 0 / 1 */
+            if (val != 0 && val != 1)
+                return -EINVAL;
+
+            data->enabled = val;
+            return 0;
+
+        case hwmon_pwm_input:
+            if (!data->enabled)
+                return -EACCES;
+
+            if (val < 0 || val > 255)
+                return -EINVAL;
+
+            data->pwm_value = val;
+            return 0;
     }
+
     return -EINVAL;
 }
 
@@ -64,8 +106,17 @@ static const struct hwmon_ops virtual_fan_hwmon_ops = {
 };
 
 static const struct hwmon_channel_info *virtual_fan_info[] = {
-    HWMON_CHANNEL_INFO(pwm, HWMON_PWM_INPUT),
-    HWMON_CHANNEL_INFO(fan, HWMON_F_INPUT),
+    /* * 这里的第一个参数是类型(pwm)，
+     * 后面的参数是该类型下的多个属性。
+     * 内核会将它们全部归类为索引 1 (pwm1, pwm1_enable, pwm1_mode)
+     */
+    HWMON_CHANNEL_INFO(pwm,
+                       HWMON_PWM_INPUT|    /* 对应 pwm1 */
+                       HWMON_PWM_ENABLE|   /* 对应 pwm1_enable */
+                       HWMON_PWM_MODE),    /* 对应 pwm1_mode */
+
+    HWMON_CHANNEL_INFO(fan,
+                       HWMON_F_INPUT),     /* 对应 fan1_input */
     NULL
 };
 
