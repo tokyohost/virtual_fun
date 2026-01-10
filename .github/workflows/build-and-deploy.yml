@@ -62,10 +62,4 @@ jobs:
         with:
           name: virtual-fan-deb
           path: *.deb
-          
-      # Step 7: Clean up
-      - name: Clean up
-        run: |
-          sudo dkms remove -m virtual-fan -v 1.0 --all
-          sudo rm -rf /usr/src/virtual-fan-1.0
 
