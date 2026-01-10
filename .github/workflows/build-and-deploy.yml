@@ -56,6 +56,8 @@ jobs:
           echo "BUILT_MODULE_NAME[0]=\"virtual_fan\"" >> ~/virtual-fan-1.0/debian/dkms.conf
           echo "DEST_MODULE_LOCATION[0]=\"/extra\"" >> ~/virtual-fan-1.0/debian/dkms.conf
           echo "AUTOINSTALL=\"yes\"" >> ~/virtual-fan-1.0/debian/dkms.conf
+          # 复制源代码到 /usr/src/
+          sudo cp -r ~/virtual-fan-1.0 /usr/src/virtual-fan-1.0
       # Step 4: Build DKMS module
       - name: Build DKMS module
         run: |
