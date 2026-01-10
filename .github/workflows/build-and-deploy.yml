@@ -58,8 +58,9 @@ jobs:
 
       # Step 6: Upload .deb artifact
       - name: Upload .deb artifact
+        run: |
+          ls -l *.deb
         uses: actions/upload-artifact@v2
         with:
           name: virtual-fan-deb
-          path: *.deb
-
+          path: ./virtual-fan_1.0-1_amd64.deb  # 明确指定文件名1
