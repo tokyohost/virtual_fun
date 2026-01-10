@@ -36,15 +36,14 @@ jobs:
           cp virtual_fan.c ~/virtual-fan-1.0/
           cd ~/virtual-fan-1.0
         
-          mkdir debian
+          sudo mkdir debian
           echo "Source: virtual-fan" > debian/control
           echo "Maintainer: <tokyohost>" >> debian/control
           echo "Build-Depends: debhelper, dkms" >> debian/control
           echo "Standards-Version: 3.9.8" >> debian/control
           echo "Package: virtual-fan" >> debian/control
-          mkdir debian
-          touch debian/changelog
-          touch debian/rules
+          sudo touch debian/changelog
+          sudo touch debian/rules
           
           # Your DKMS setup (dkms.conf file)
           echo "PACKAGE_NAME=\"virtual-fan\"" > debian/dkms.conf
