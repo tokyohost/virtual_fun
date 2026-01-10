@@ -58,6 +58,7 @@ jobs:
           echo "AUTOINSTALL=\"yes\"" >> ~/virtual-fan-1.0/debian/dkms.conf
           # 复制源代码到 /usr/src/
           sudo cp -r ~/virtual-fan-1.0 /usr/src/virtual-fan-1.0
+          ls /usr/src/virtual-fan-1.0
       # Step 4: Build DKMS module
       - name: Build DKMS module
         run: |
