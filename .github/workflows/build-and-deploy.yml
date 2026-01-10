@@ -50,13 +50,14 @@ jobs:
           touch ~/virtual-fan-1.0/debian/changelog
           touch ~/virtual-fan-1.0/debian/rules
           
-          # Your DKMS setup (dkms.conf file)
-          echo "PACKAGE_NAME=\"virtual-fan\"" > ~/virtual-fan-1.0/debian/dkms.conf
-          echo "PACKAGE_VERSION=\"1.0\"" >> ~/virtual-fan-1.0/debian/dkms.conf
-          echo "BUILT_MODULE_NAME[0]=\"virtual_fan\"" >> ~/virtual-fan-1.0/debian/dkms.conf
-          echo "DEST_MODULE_LOCATION[0]=\"/extra\"" >> ~/virtual-fan-1.0/debian/dkms.conf
-          echo "AUTOINSTALL=\"yes\"" >> ~/virtual-fan-1.0/debian/dkms.conf
-          # 复制源代码到 /usr/src/
+          # DKMS 配置文件 dkms.conf，确保路径正确
+          echo "PACKAGE_NAME=\"virtual-fan\"" > ~/virtual-fan-1.0/dkms.conf
+          echo "PACKAGE_VERSION=\"1.0\"" >> ~/virtual-fan-1.0/dkms.conf
+          echo "BUILT_MODULE_NAME[0]=\"virtual_fan\"" >> ~/virtual-fan-1.0/dkms.conf
+          echo "DEST_MODULE_LOCATION[0]=\"/extra\"" >> ~/virtual-fan-1.0/dkms.conf
+          echo "AUTOINSTALL=\"yes\"" >> ~/virtual-fan-1.0/dkms.conf
+      
+          # 复制源代码到 /usr/src/ 目录，并包括 dkms.conf 和 debian 目录
           sudo cp -r ~/virtual-fan-1.0 /usr/src/virtual-fan-1.0
           ls /usr/src/virtual-fan-1.0
       # Step 4: Build DKMS module
