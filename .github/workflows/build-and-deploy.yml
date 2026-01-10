@@ -32,11 +32,11 @@ jobs:
       # Step 3: Prepare DKMS environment
       - name: Prepare DKMS module
         run: |
-          mkdir -p /usr/src/virtual-fan-1.0
-          cp virtual_fan.c /usr/src/virtual-fan-1.0/
-          cd /usr/src/virtual-fan-1.0
+          mkdir -p ~/virtual-fan-1.0
+          cp virtual_fan.c ~/virtual-fan-1.0/
+          cd ~/virtual-fan-1.0
           echo "Source: virtual-fan" > debian/control
-          echo "Maintainer: <Your Name>" >> debian/control
+          echo "Maintainer: <tokyohost>" >> debian/control
           echo "Build-Depends: debhelper, dkms" >> debian/control
           echo "Standards-Version: 3.9.8" >> debian/control
           echo "Package: virtual-fan" >> debian/control
