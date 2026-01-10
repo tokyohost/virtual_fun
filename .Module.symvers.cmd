@@ -1,0 +1,1 @@
+cmd_/home/lixuehui/CLionProjects/virtual_fan/Module.symvers := sed 's/\.ko$$/\.o/' /home/lixuehui/CLionProjects/virtual_fan/modules.order | scripts/mod/modpost -m -a  -o /home/lixuehui/CLionProjects/virtual_fan/Module.symvers -e -i Module.symvers   -T -
