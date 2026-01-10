@@ -35,6 +35,8 @@ jobs:
           mkdir -p ~/virtual-fan-1.0
           cp virtual_fan.c ~/virtual-fan-1.0/
           cd ~/virtual-fan-1.0
+        
+          mkdir debian
           echo "Source: virtual-fan" > debian/control
           echo "Maintainer: <tokyohost>" >> debian/control
           echo "Build-Depends: debhelper, dkms" >> debian/control
