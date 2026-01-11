@@ -1,0 +1,1 @@
+make && sudo rmmod virtual_fan; sudo insmod virtual_fan.ko

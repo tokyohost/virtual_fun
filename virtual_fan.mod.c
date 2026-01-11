@@ -29,11 +29,13 @@ static const struct modversion_info ____versions[]
 __used __section("__versions") = {
 	{ 0xd9726f80, "module_layout" },
 	{ 0xe28fd47, "platform_device_unregister" },
-	{ 0xc959d152, "__stack_chk_fail" },
 	{ 0x68de7c4, "platform_driver_unregister" },
 	{ 0x833a6efa, "platform_device_register_full" },
 	{ 0xd4415d08, "__platform_driver_register" },
+	{ 0x8c29242a, "device_create_file" },
+	{ 0x656e4a6e, "snprintf" },
 	{ 0xc5850110, "printk" },
+	{ 0xc959d152, "__stack_chk_fail" },
 	{ 0x79964649, "devm_hwmon_device_register_with_info" },
 	{ 0xbb4d6184, "devm_kmalloc" },
 	{ 0xbdfb6dbb, "__fentry__" },
@@ -42,4 +44,4 @@ __used __section("__versions") = {
 MODULE_INFO(depends, "");
 
 
-MODULE_INFO(srcversion, "6A680A8495D493B6DF8FCE6");
+MODULE_INFO(srcversion, "11981A179A6A949E4B327EA");

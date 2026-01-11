@@ -14,4 +14,4 @@ dmesg -wH
 
 
 #show device
-at /sys/class/hwmon/hwmon*/name
+cat /sys/class/hwmon/hwmon*/name
