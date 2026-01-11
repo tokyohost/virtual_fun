@@ -118,47 +118,11 @@ static const struct hwmon_chip_info virtual_fan_chip_info = {
 
 // 属性文件的显示函数
 static ssize_t virtual_fan_marker_show(struct device *dev, struct device_attribute *attr, char *buf) {
-    return snprintf(buf, PAGE_SIZE, "This is a virtual fan device created by virtual Fan project.\n");
+    return snprintf(buf, PAGE_SIZE, "vFanByTk\n");
 }
 
 // 创建一个 sysfs 属性
 static DEVICE_ATTR(marker, 0444, virtual_fan_marker_show, NULL);
-// 创建标记文件的辅助函数
-static int create_marker_file(const char *path) {
-    struct file *file;
-    char *buf;
-    int ret;
-
-    // 创建文件
-    file = filp_open(path, O_WRONLY | O_CREAT | O_TRUNC, 0644);
-    if (IS_ERR(file)) {
-        pr_err("Virtual Fan: Failed to open file for writing\n");
-        return PTR_ERR(file);
-    }
-
-    // 准备写入的内容
-    buf = kmalloc(128, GFP_KERNEL);
-    if (!buf) {
-        filp_close(file, NULL);
-        return -ENOMEM;
-    }
-
-    snprintf(buf, 128, "This is a virtual fan device created by virtual Fan project.\n");
-
-    // 使用 kernel_write 写入文件
-    ret = kernel_write(file, buf, strlen(buf), 0);
-    if (ret < 0) {
-        pr_err("Virtual Fan: Failed to write to marker file\n");
-        kfree(buf);
-        filp_close(file, NULL);
-        return ret;
-    }
-
-    // 关闭文件和释放内存
-    kfree(buf);
-    filp_close(file, NULL);
-    return 0;
-}
 
 
 static struct platform_device *v_pdev;
