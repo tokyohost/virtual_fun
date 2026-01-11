@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 4.1)
-project(virtual_fan C)
+project(virtual_fan_kernel C)
 
 set(CMAKE_C_STANDARD 11)
 

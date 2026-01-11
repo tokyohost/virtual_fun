@@ -1,1 +1,1 @@
-cmd_/home/lixuehui/CLionProjects/virtual_fan/modules.order := {   echo /home/lixuehui/CLionProjects/virtual_fan/virtual_fan.ko; :; } | awk '!x[$$0]++' - > /home/lixuehui/CLionProjects/virtual_fan/modules.order
+cmd_/home/lixuehui/CLionProjects/virtual_fan_kernel/modules.order := {   echo /home/lixuehui/CLionProjects/virtual_fan_kernel/virtual_fan.ko; :; } | awk '!x[$$0]++' - > /home/lixuehui/CLionProjects/virtual_fan_kernel/modules.order

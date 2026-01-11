@@ -1,2 +1,2 @@
-/home/lixuehui/CLionProjects/virtual_fan/virtual_fan.o
+/home/lixuehui/CLionProjects/virtual_fan_kernel/virtual_fan.o
 

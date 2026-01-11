@@ -1,3 +1,6 @@
+# install pak
+sudo apt-get install linux-headers-$(uname -r)
+
 # build
 make
 # install to kernel
