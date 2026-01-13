@@ -1,0 +1,21 @@
+# Systemd 服务单元文件，用于管理 Pico Fan Bridge 程序的启动和停止
+#/etc/systemd/system/pico-fan.service
+[Unit]
+Description=Pico Fan Bridge Service
+# 确保在网络和串口设备准备好后再启动
+After=network.target
+
+[Service]
+# 以 root 身份运行，因为需要读写 /sys/class/hwmon 和串口
+User=root
+ExecStart=/usr/local/bin/pico-fan-bridge
+# 如果程序崩溃，5秒后自动重启
+Restart=always
+RestartSec=5
+# 标准输出和错误日志记录到 journald
+StandardOutput=inherit
+StandardError=inherit
+
+[Install]
+# 设置为多用户模式下启动（即系统正常启动后）
+WantedBy=multi-user.target
