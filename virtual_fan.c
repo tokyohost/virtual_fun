@@ -18,6 +18,9 @@ struct virtual_fan_data {
 // 定义哪些属性是可见的
 static umode_t virtual_fan_is_visible(const void *data, enum hwmon_sensor_types type,
                                       u32 attr, int channel) {
+    if (type == hwmon_fan && attr == hwmon_fan_input) {
+        return 0644; // 修改为 0644，允许 Go 写入真实 RPM
+    }
     if (type == hwmon_pwm) {
         switch (attr) {
             case hwmon_pwm_input:
@@ -39,7 +42,10 @@ static umode_t virtual_fan_is_visible(const void *data, enum hwmon_sensor_types 
 static int virtual_fan_read(struct device *dev, enum hwmon_sensor_types type,
                             u32 attr, int channel, long *val) {
     struct virtual_fan_data *data = dev_get_drvdata(dev);
-
+    if (type == hwmon_fan && attr == hwmon_fan_input) {
+        *val = data->fan_speed; // 返回由 Go 程序写入的真实值
+        return 0;
+    }
     if (type == hwmon_pwm) {
         if (attr == hwmon_pwm_input) {
             *val = data->pwm_value;
@@ -68,6 +74,10 @@ static int virtual_fan_write(struct device *dev, enum hwmon_sensor_types type,
                              u32 attr, int channel, long val) {
     struct virtual_fan_data *data = dev_get_drvdata(dev);
 
+    if (type == hwmon_fan && attr == hwmon_fan_input) {
+        data->fan_speed = val; // 接收来自 Go 的真实转速数据
+        return 0;
+    }
     if (channel != 0 || type != hwmon_pwm) {
         return -EINVAL;
     }
