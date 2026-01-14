@@ -42,30 +42,27 @@ static umode_t virtual_fan_is_visible(const void *data, enum hwmon_sensor_types 
 static int virtual_fan_read(struct device *dev, enum hwmon_sensor_types type,
                             u32 attr, int channel, long *val) {
     struct virtual_fan_data *data = dev_get_drvdata(dev);
+
+    // 越界检查
+    if (channel < 0 || channel >= NUM_FANS) return -EINVAL;
+
     if (type == hwmon_fan && attr == hwmon_fan_input) {
-        *val = data->fan_speed; // 返回由 Go 程序写入的真实值
+        *val = data->fan_speed[channel];
         return 0;
     }
+
     if (type == hwmon_pwm) {
-        if (attr == hwmon_pwm_input) {
-            *val = data->pwm_value;
-            return 0;
+        switch (attr) {
+            case hwmon_pwm_input:
+                *val = data->pwm_value[channel];
+                return 0;
+            case hwmon_pwm_enable:
+                *val = data->enabled[channel];
+                return 0;
+            default:
+                return -EOPNOTSUPP;
         }
-        if (attr == hwmon_pwm_enable) {
-            *val = data->enabled; // 返回 0 或 1
-            return 0;
-        }
-        return -EOPNOTSUPP;
     }
-
-    if (type == hwmon_fan) {
-        if (attr == hwmon_fan_input) {
-            *val = data->pwm_value * 20; // 假设转速与 PWM 值成比例
-            return 0;
-        }
-        return -EOPNOTSUPP;
-    }
-
     return -EOPNOTSUPP;
 }
 
@@ -74,33 +71,26 @@ static int virtual_fan_write(struct device *dev, enum hwmon_sensor_types type,
                              u32 attr, int channel, long val) {
     struct virtual_fan_data *data = dev_get_drvdata(dev);
 
+    if (channel < 0 || channel >= NUM_FANS) return -EINVAL;
+
     if (type == hwmon_fan && attr == hwmon_fan_input) {
-        data->fan_speed = val; // 接收来自 Go 的真实转速数据
+        data->fan_speed[channel] = val;
         return 0;
     }
-    if (channel != 0 || type != hwmon_pwm) {
-        return -EINVAL;
+
+    if (type == hwmon_pwm) {
+        switch (attr) {
+            case hwmon_pwm_enable:
+                if (val != 0 && val != 1) return -EINVAL;
+                data->enabled[channel] = val;
+                return 0;
+            case hwmon_pwm_input:
+                if (!data->enabled[channel]) return -EACCES;
+                if (val < 0 || val > 255) return -EINVAL;
+                data->pwm_value[channel] = val;
+                return 0;
+        }
     }
-
-    switch (attr) {
-        case hwmon_pwm_enable:
-            if (val != 0 && val != 1) {
-                return -EINVAL;
-            }
-            data->enabled = val;
-            return 0;
-
-        case hwmon_pwm_input:
-            if (!data->enabled) {
-                return -EACCES;
-            }
-            if (val < 0 || val > 255) {
-                return -EINVAL;
-            }
-            data->pwm_value = val;
-            return 0;
-    }
-
     return -EINVAL;
 }
 
@@ -112,15 +102,18 @@ static const struct hwmon_ops virtual_fan_hwmon_ops = {
 };
 
 static const struct hwmon_channel_info *virtual_fan_info[] = {
+    // 注册 3 个 PWM 通道
     HWMON_CHANNEL_INFO(pwm,
-                       HWMON_PWM_INPUT |
-                       HWMON_PWM_ENABLE |
-                       HWMON_PWM_MODE),
+                       HWMON_PWM_INPUT | HWMON_PWM_ENABLE | HWMON_PWM_MODE, // PWM 1
+                       HWMON_PWM_INPUT | HWMON_PWM_ENABLE | HWMON_PWM_MODE, // PWM 2
+                       HWMON_PWM_INPUT | HWMON_PWM_ENABLE | HWMON_PWM_MODE),// PWM 3
+    // 注册 3 个 Fan 通道
     HWMON_CHANNEL_INFO(fan,
-                       HWMON_F_INPUT),
+                       HWMON_F_INPUT,  // Fan 1
+                       HWMON_F_INPUT,  // Fan 2
+                       HWMON_F_INPUT), // Fan 3
     NULL
 };
-
 static const struct hwmon_chip_info virtual_fan_chip_info = {
     .ops = &virtual_fan_hwmon_ops,
     .info = virtual_fan_info,
