@@ -17,6 +17,13 @@ struct virtual_fan_data {
     long enabled[NUM_FANS];     // 数组：保存每个风扇的使能状态
     long fan_speed[NUM_FANS];   // 数组：保存来自 Go 的真实 RPM
 };
+// 属性文件的显示函数
+static ssize_t virtual_fan_marker_show(struct device *dev, struct device_attribute *attr, char *buf) {
+    return snprintf(buf, PAGE_SIZE, "vFanByTk\n");
+}
+
+// 创建一个 sysfs 属性
+static DEVICE_ATTR(marker, 0444, virtual_fan_marker_show, NULL);
 
 // 属性可见性逻辑
 static umode_t virtual_fan_is_visible(const void *data, enum hwmon_sensor_types type,
@@ -121,6 +128,7 @@ static const struct hwmon_chip_info virtual_fan_chip_info = {
 static int virtual_fan_probe(struct platform_device *pdev) {
     struct device *hwmon_dev;
     struct virtual_fan_data *data;
+    int ret;
     int i;
 
     data = devm_kzalloc(&pdev->dev, sizeof(struct virtual_fan_data), GFP_KERNEL);
@@ -138,6 +146,14 @@ static int virtual_fan_probe(struct platform_device *pdev) {
     if (IS_ERR(hwmon_dev)) return PTR_ERR(hwmon_dev);
 
     platform_set_drvdata(pdev, data);
+
+    // 创建 sysfs 属性文件
+    ret = device_create_file(&pdev->dev, &dev_attr_marker);
+    if (ret) {
+        pr_err("Virtual Fan: Failed to create sysfs attribute\n");
+    } else {
+        pr_info("Virtual Fan: Sysfs attribute created successfully\n");
+    }
     return 0;
 }
 
