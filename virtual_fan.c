@@ -74,33 +74,26 @@ static int virtual_fan_write(struct device *dev, enum hwmon_sensor_types type,
                              u32 attr, int channel, long val) {
     struct virtual_fan_data *data = dev_get_drvdata(dev);
 
+    if (channel < 0 || channel >= NUM_FANS) return -EINVAL;
+
     if (type == hwmon_fan && attr == hwmon_fan_input) {
-        data->fan_speed = val; // 接收来自 Go 的真实转速数据
+        data->fan_speed[channel] = val;
         return 0;
     }
-    if (channel != 0 || type != hwmon_pwm) {
-        return -EINVAL;
+
+    if (type == hwmon_pwm) {
+        switch (attr) {
+            case hwmon_pwm_enable:
+                if (val != 0 && val != 1) return -EINVAL;
+                data->enabled[channel] = val;
+                return 0;
+            case hwmon_pwm_input:
+                if (!data->enabled[channel]) return -EACCES;
+                if (val < 0 || val > 255) return -EINVAL;
+                data->pwm_value[channel] = val;
+                return 0;
+        }
     }
-
-    switch (attr) {
-        case hwmon_pwm_enable:
-            if (val != 0 && val != 1) {
-                return -EINVAL;
-            }
-            data->enabled = val;
-            return 0;
-
-        case hwmon_pwm_input:
-            if (!data->enabled) {
-                return -EACCES;
-            }
-            if (val < 0 || val > 255) {
-                return -EINVAL;
-            }
-            data->pwm_value = val;
-            return 0;
-    }
-
     return -EINVAL;
 }
 
@@ -148,7 +141,11 @@ static int virtual_fan_probe(struct platform_device *pdev) {
     data = devm_kzalloc(&pdev->dev, sizeof(struct virtual_fan_data), GFP_KERNEL);
     if (!data) return -ENOMEM;
 
-    data->pwm_value = 100; // 默认初始值
+    // 初始化所有通道
+    for (i = 0; i < NUM_FANS; i++) {
+        data->pwm_value[i] = 100;
+        data->enabled[i] = 1;      // 默认开启手动控制
+    }
 
     hwmon_dev = devm_hwmon_device_register_with_info(&pdev->dev, "virtual_pwm_fan",
                                                      data, &virtual_fan_chip_info, NULL);
