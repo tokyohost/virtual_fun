@@ -149,8 +149,23 @@ static struct platform_driver virtual_fan_driver = {
 static struct platform_device *v_pdev;
 
 static int __init virtual_fan_init(void) {
-    platform_driver_register(&virtual_fan_driver);
+    int ret;
+    pr_info("Virtual Fan: Module loading...\n");
+
+    ret = platform_driver_register(&virtual_fan_driver);
+    if (ret) {
+        pr_err("Virtual Fan: Failed to register driver\n");
+        return ret;
+    }
+
     v_pdev = platform_device_register_simple("virtual_fan_driver", -1, NULL, 0);
+    if (IS_ERR(v_pdev)) {
+        pr_err("Virtual Fan: Failed to register device\n");
+        platform_driver_unregister(&virtual_fan_driver);
+        return PTR_ERR(v_pdev);
+    }
+
+    pr_info("Virtual Fan: Device registered successfully!\n");
     return 0;
 }
 
