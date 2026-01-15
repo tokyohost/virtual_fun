@@ -71,6 +71,7 @@ cd "$WORKDIR"
 
 if [ ! -d "$REPO_DIR" ]; then
   echo "[INFO] Cloning repository..."
+  git config --global http.version HTTP/1.1
   git clone "$REPO_URL"
 else
   echo "[INFO] Repository already exists, pulling latest..."
