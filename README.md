@@ -9,3 +9,13 @@ CHECK INSTALL STATUS
 ```bash
 curl -fsSL https://raw.githubusercontent.com/tokyohost/virtual_fun_kernel/master/check.sh | sudo bash
 ```
+
+REBOOT
+```bash
+lsmod | grep virtual_fan
+```
+
+CHECK
+```bash
+lsmod | grep virtual_fan
+```
