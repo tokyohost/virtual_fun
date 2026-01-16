@@ -15,9 +15,11 @@ This driver exposes a **virtual fan device** to the Linux `hwmon` subsystem, all
 - Can integrate with USB fan controllers or external MCUs
 
 ---
-## Go bridge project
-[Go Bridge(control pico and report rpm) project](https://github.com/tokyohost/virtualFunGo)
-
+This project works together with the following components:
+- `virtual_funPico` ( a firmware project running on the Raspberry Pi Pico (RP2040))  
+  https://github.com/tokyohost/virtual_funPico
+- `virtualFunGo` (Go-based bridge service)  
+  https://github.com/tokyohost/virtualFunGo
 ## 🧠 How It Works
 
 This kernel module registers a virtual `hwmon` device and exposes standard fan control interfaces under:
